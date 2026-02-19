@@ -50,7 +50,7 @@ export default function PublicBillPage() {
   useEffect(() => {
     async function fetchBill() {
       try {
-        const response = await fetch(`/api/bills/${billCode}`);
+        const response = await fetch(`/api/bills/code/${billCode}`);
         if (response.ok) {
           const data = await response.json();
           setBill(data);

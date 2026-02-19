@@ -27,7 +27,7 @@ export function GuestJoin({ billCode, onJoin }: GuestJoinProps) {
       
       if (!participantId) {
         // Create new participant via API
-        const response = await fetch(`/api/bills/${billCode}/participants`, {
+        const response = await fetch(`/api/bills/code/${billCode}/participants`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ displayName: displayName.trim() }),

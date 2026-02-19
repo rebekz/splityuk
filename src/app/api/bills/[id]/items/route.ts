@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { billItems } from "@/lib/schema";
-import { auth } from "@/lib/auth";
 import { eq } from "drizzle-orm";
 
 // GET /api/bills/[id]/items - Get all items for a bill
@@ -30,12 +29,6 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
-    const session = await auth();
-    const participantId = request.headers.get("x-participant-id");
-
-    if (!session?.user?.id && !participantId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
 
     const body = await request.json();
     const { name, unitPrice, quantity } = body;
@@ -45,7 +38,7 @@ export async function POST(
       .values({
         billId: id,
         name: name || "Item",
-        unitPrice: unitPrice.toString(),
+        unitPrice: (unitPrice || 0).toString(),
         quantity: quantity || 1,
       })
       .returning();
@@ -64,12 +57,6 @@ export async function PUT(
 ) {
   try {
     const { id } = await params;
-    const session = await auth();
-    const participantId = request.headers.get("x-participant-id");
-
-    if (!session?.user?.id && !participantId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
 
     const body = await request.json();
     const { itemId, name, unitPrice, quantity } = body;
@@ -98,12 +85,6 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    const session = await auth();
-    const participantId = request.headers.get("x-participant-id");
-
-    if (!session?.user?.id && !participantId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
 
     const { searchParams } = new URL(request.url);
     const itemId = searchParams.get("itemId");
