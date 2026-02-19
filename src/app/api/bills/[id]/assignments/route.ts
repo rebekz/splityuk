@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { itemAssignments, billItems } from "@/lib/schema";
-import { auth } from "@/lib/auth";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 
 // GET /api/bills/[id]/assignments - Get all assignments for a bill
 export async function GET(
@@ -28,7 +27,7 @@ export async function GET(
     const assignments = await db
       .select()
       .from(itemAssignments)
-      .where(eq(itemAssignments.itemId, itemIds[0])); // Simplified - in production use IN clause
+      .where(inArray(itemAssignments.itemId, itemIds));
 
     return NextResponse.json(assignments);
   } catch (error) {
@@ -44,22 +43,16 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
-    const session = await auth();
-    const participantId = request.headers.get("x-participant-id");
-
-    if (!session?.user?.id && !participantId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
 
     const body = await request.json();
-    const { itemId, participantId: targetParticipantId, amount } = body;
+    const { itemId, participantId, amount } = body;
 
     const [assignment] = await db
       .insert(itemAssignments)
       .values({
         itemId,
-        participantId: targetParticipantId,
-        amount: amount.toString(),
+        participantId,
+        amount: (amount || 0).toString(),
       })
       .returning();
 
@@ -77,12 +70,6 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    const session = await auth();
-    const participantId = request.headers.get("x-participant-id");
-
-    if (!session?.user?.id && !participantId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
 
     const { searchParams } = new URL(request.url);
     const itemId = searchParams.get("itemId");
