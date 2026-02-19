@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { paymentInfo, paymentStatus, bills, participants } from "@/lib/schema";
-import { auth } from "@/lib/auth";
+import { paymentInfo, paymentStatus } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 
 // GET /api/bills/[id]/payment - Get payment info
@@ -24,24 +23,13 @@ export async function GET(
   }
 }
 
-// PUT /api/bills/[id]/payment - Update payment info
+// PUT /api/bills/[id]/payment - Update payment info (bank details)
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params;
-    const session = await auth();
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // Check if user is creator
-    const [bill] = await db.select().from(bills).where(eq(bills.id, id));
-    if (!bill || bill.creatorId !== session.user.id) {
-      return NextResponse.json({ error: "Only creator can update" }, { status: 403 });
-    }
 
     const body = await request.json();
     const { bankName, accountNumber, accountName } = body;
@@ -80,17 +68,6 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params;
-    const session = await auth();
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // Check if user is creator
-    const [bill] = await db.select().from(bills).where(eq(bills.id, id));
-    if (!bill || bill.creatorId !== session.user.id) {
-      return NextResponse.json({ error: "Only creator can mark payments" }, { status: 403 });
-    }
 
     const body = await request.json();
     const { participantId, isPaid } = body;
