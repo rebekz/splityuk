@@ -1,22 +1,36 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { bills, participants } from "@/lib/schema";
+import { bills, participants, users } from "@/lib/schema";
 import { auth } from "@/lib/auth";
 import { eq } from "drizzle-orm";
 import { generateShareCode } from "@/lib/idr";
+import { randomUUID } from "crypto";
 
 // GET /api/bills - List user's bills
 export async function GET() {
   try {
     const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    
+    // For testing without auth, create/get a test user
+    const testEmail = "test@splityuk.test";
+    let testUser = await db.select().from(users).where(eq(users.email, testEmail)).limit(1);
+    
+    let userId: string;
+    if (testUser.length > 0) {
+      userId = testUser[0].id;
+    } else {
+      userId = randomUUID();
+      await db.insert(users).values({
+        id: userId,
+        email: testEmail,
+        name: "Test User",
+      });
     }
 
     const userBills = await db
       .select()
       .from(bills)
-      .where(eq(bills.creatorId, session.user.id))
+      .where(eq(bills.creatorId, userId))
       .orderBy(bills.createdAt);
 
     return NextResponse.json(userBills);
@@ -30,8 +44,21 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    
+    // For testing without auth, create/get a test user
+    const testEmail = "test@splityuk.test";
+    let testUser = await db.select().from(users).where(eq(users.email, testEmail)).limit(1);
+    
+    let userId: string;
+    if (testUser.length > 0) {
+      userId = testUser[0].id;
+    } else {
+      userId = randomUUID();
+      await db.insert(users).values({
+        id: userId,
+        email: testEmail,
+        name: "Test User",
+      });
     }
 
     const body = await request.json();
@@ -45,7 +72,7 @@ export async function POST(request: NextRequest) {
         name: name || "Tagihan Baru",
         date: date ? new Date(date) : new Date(),
         shareCode,
-        creatorId: session.user.id,
+        creatorId: userId,
         status: "active",
       })
       .returning();
@@ -53,8 +80,8 @@ export async function POST(request: NextRequest) {
     // Auto-add creator as participant
     await db.insert(participants).values({
       billId: newBill.id,
-      userId: session.user.id,
-      displayName: session.user.name || "Creator",
+      userId: userId,
+      displayName: "Test User",
     });
 
     return NextResponse.json(newBill, { status: 201 });

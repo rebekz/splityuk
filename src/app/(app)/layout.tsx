@@ -1,17 +1,11 @@
-import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
+// TEMPORARILY DISABLED AUTH FOR TESTING
+// TODO: Re-enable after configuring OAuth
 
-export default async function AppLayout({
+export default function AppLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth();
-  
-  if (!session) {
-    redirect("/api/auth/signin");
-  }
-
   return (
     <div className="min-h-screen bg-background">
       <nav className="border-b">
@@ -25,9 +19,6 @@ export default async function AppLayout({
             </a>
             <a href="/profil" className="text-sm hover:underline">
               Profile
-            </a>
-            <a href="/api/auth/signout" className="text-sm hover:underline text-muted-foreground">
-              Sign Out
             </a>
           </div>
         </div>
