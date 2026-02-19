@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Users, Receipt } from "lucide-react";
+import Link from "next/link";
 
 export default function DashboardPage() {
   return (
@@ -8,39 +9,68 @@ export default function DashboardPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground">Manage your shared bills</p>
+          <p className="text-muted-foreground">Kelola tagihan bersama kamu</p>
         </div>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          New Bill
-        </Button>
+        <Link href="/bill/baru">
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            Tagihan Baru
+          </Button>
+        </Link>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {/* Placeholder bills */}
-        {[1, 2, 3].map((i) => (
-          <Card key={i} className="hover:shadow-md transition-shadow cursor-pointer">
+      {/* Quick Actions */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <Link href="/bill/baru">
+          <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
             <CardHeader>
-              <CardTitle className="text-lg">Bill #{i}</CardTitle>
-              <CardDescription>Restaurant dinner</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex justify-between items-center">
-                <span className="text-2xl font-bold">Rp 450.000</span>
-                <span className="text-sm text-muted-foreground">4 people</span>
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Plus className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg">Buat Tagihan Baru</CardTitle>
+                  <CardDescription>
+                    Mulai tagihan untuk dibagi
+                  </CardDescription>
+                </div>
               </div>
-            </CardContent>
+            </CardHeader>
           </Card>
-        ))}
+        </Link>
+
+        <Link href="/grup">
+          <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <Users className="h-6 w-6 text-blue-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg">Kelola Grup</CardTitle>
+                  <CardDescription>
+                    Grup untuk tagihan rutin
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+          </Card>
+        </Link>
       </div>
 
+      {/* Empty State */}
       <Card className="border-dashed">
         <CardContent className="flex flex-col items-center justify-center py-12">
-          <p className="text-muted-foreground mb-4">No bills yet. Create your first bill to start splitting!</p>
-          <Button variant="outline">
-            <Plus className="mr-2 h-4 w-4" />
-            Create Bill
-          </Button>
+          <Receipt className="h-16 w-16 text-muted-foreground/50 mb-4" />
+          <p className="text-muted-foreground mb-4 text-center">
+            Belum ada tagihan. Buat tagihan pertama untuk mulai membagi!
+          </p>
+          <Link href="/bill/baru">
+            <Button variant="outline">
+              <Plus className="mr-2 h-4 w-4" />
+              Buat Tagihan
+            </Button>
+          </Link>
         </CardContent>
       </Card>
     </div>
